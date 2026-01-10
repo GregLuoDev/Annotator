@@ -8,7 +8,7 @@
 <app-deletion-popup
   [show]="showDeletionPopup"
   (closed)="onDeletionPopupClosed($event)"
-  [deletionText]="deletionText"
+  [deletionText]="deletedAnnotation?.text ?? ''"
 >
 </app-deletion-popup>
 

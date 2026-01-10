@@ -11,6 +11,7 @@ import {
   SpriteMaterial,
   Vector3,
 } from 'three';
+import { IAnnotation, IDeletedAnnotation } from './types';
 
 @Injectable({
   providedIn: 'root',
@@ -26,15 +27,15 @@ export class AnnotationsService {
     return this.http.get<any[]>(this.apiUrl);
   }
 
-  addAnnotation(payload: any): Observable<any> {
+  addAnnotation(payload: IAnnotation): Observable<any> {
     return this.http.post<any>(this.apiUrl, { httpMethod: 'POST', body: payload });
   }
 
-  deleteAnnotation(payload: any): Observable<any> {
+  deleteAnnotation(payload: { id: string }): Observable<any> {
     return this.http.delete<any>(this.apiUrl, { body: payload });
   }
 
-  addAnnotationOnScene(text: string, hitPoint: Vector3) {
+  addAnnotationOnScene(id: string, text: string, hitPoint: Vector3) {
     const geometry = new SphereGeometry(0.2, 32, 32);
     const material = new MeshBasicMaterial({ color: Math.random() * 0xaa4444 });
     const sphere = new Mesh(geometry, material);
@@ -43,8 +44,8 @@ export class AnnotationsService {
 
     const label = this.createTextLabel(text);
     label.position.set(0, 0.35, 0);
-    sphere.userData = { text }; // store text for popup
-    label.userData = { text }; // store text for popup
+    sphere.userData = { id, text }; // store text for popup
+    label.userData = { id, text }; // store text for popup
     sphere.add(label);
 
     // Track sphere as clickable

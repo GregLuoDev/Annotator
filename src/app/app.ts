@@ -3,7 +3,7 @@ import { PotreeViewer } from './potree-viewer/potree-viewer';
 import { InputPopup } from './input-popup/input-popup';
 import { Vector3 } from 'three';
 import { AnnotationsService } from './services/annotations';
-import { IAnnotation } from './services/types';
+import { IAnnotation, IDeletedAnnotation } from './services/types';
 import { DeletionPopup } from './deletion-popup/deletion-popup';
 
 @Component({
@@ -17,7 +17,7 @@ export class App implements AfterViewInit {
   showDeletionPopup = false;
 
   hitPoint?: Vector3;
-  deletionText: string = '';
+  deletedAnnotation?: IDeletedAnnotation;
 
   readonly annotationService = inject(AnnotationsService);
   annotations: IAnnotation[] = [];
@@ -34,30 +34,52 @@ export class App implements AfterViewInit {
     this.showInputPopup = true;
     this.hitPoint = hitPoint;
   }
-  openDeletionPopup(text: string) {
+  openDeletionPopup(deletedAnnotation: string) {
     this.showDeletionPopup = true;
-    this.deletionText = text;
+    this.deletedAnnotation = JSON.parse(deletedAnnotation);
   }
 
-  onPopupClosed(value: string | null) {
+  onPopupClosed(inputtedText: string | null) {
     this.showInputPopup = false;
 
-    if (value && this.hitPoint) {
-      console.log('User input:', value);
-
-      const text = value;
+    if (inputtedText && this.hitPoint) {
+      const text = inputtedText;
       const x = this.hitPoint.x;
       const y = this.hitPoint.y;
       const z = this.hitPoint.z;
-      this.annotationService.addAnnotation({ text, x, y, z }).subscribe(() => {
+      const id = crypto.randomUUID();
+      this.annotationService.addAnnotation({ id, text, x, y, z }).subscribe(() => {
         if (this.hitPoint) {
-          this.annotationService.addAnnotationOnScene(value, this.hitPoint);
+          this.annotationService.addAnnotationOnScene(id, inputtedText, this.hitPoint);
         }
       });
     }
   }
 
-  onDeletionPopupClosed(value: boolean | null) {
-    console.log('deletion value', value);
+  onDeletionPopupClosed(confirmed: boolean) {
+    if (confirmed && this.deletedAnnotation) {
+      this.annotationService.deleteAnnotation({ id: this.deletedAnnotation.id }).subscribe(() => {
+        let deletedIds: number[] = [];
+        this.annotationService.scene.children.forEach((c1) => {
+          c1.children.forEach((c2) => {
+            if (this.deletedAnnotation && c2.userData['id'] === this.deletedAnnotation.id) {
+              deletedIds.push(c2.id);
+              deletedIds.push(c1.id);
+            }
+          });
+        });
+
+        deletedIds.forEach((id) => {
+          const foundObject = this.annotationService.scene.getObjectById(id);
+          if (foundObject) {
+            foundObject.removeFromParent();
+          }
+        });
+
+        this.deletedAnnotation = undefined;
+      });
+    }
+
+    this.showDeletionPopup = false;
   }
 }

@@ -55,9 +55,10 @@ export class PotreeViewer implements AfterViewInit, OnInit {
   constructor() {
     effect(() => {
       this._annotations().forEach((annotation) => {
+        const id = annotation.id;
         const text = annotation.text;
         const hitPoint = { x: annotation.x, y: annotation.y, z: annotation.z } as Vector3;
-        this.annotationService.addAnnotationOnScene(text, hitPoint);
+        this.annotationService.addAnnotationOnScene(id, text, hitPoint);
       });
     });
   }
@@ -193,11 +194,7 @@ export class PotreeViewer implements AfterViewInit, OnInit {
     );
     if (intersectAnnotations.length > 0) {
       const obj = intersectAnnotations[0].object;
-      console.log('Clicked object:', obj);
-
-      // Open popup (can be a DOM modal or alert for demo)
-      alert(`You clicked annotation: ${(obj.userData as any).text}`);
-      this.openDeletionPopup.emit((obj.userData as any).text);
+      this.openDeletionPopup.emit(JSON.stringify(obj.userData));
     } else {
       const intersects = this.raycaster.intersectObject(this.scene, true);
 

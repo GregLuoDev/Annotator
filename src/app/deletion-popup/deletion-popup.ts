@@ -9,7 +9,7 @@ import { FormsModule } from '@angular/forms';
 export class DeletionPopup {
   @Input() deletionText = '';
   @Input() show = false;
-  @Output() closed = new EventEmitter<boolean | null>();
+  @Output() closed = new EventEmitter<boolean>();
 
   confirm() {
     this.closed.emit(true);
