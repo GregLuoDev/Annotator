@@ -1,10 +1,14 @@
 <div class="text-lg font-semibold text-gray-800">
   GREG LUO
-  <span class="text-gray-500 font-normal"> (greg.luo@outlook.com)</span>
+  <span class="text-gray-500 font-normal"> (greg.luo@outlook.com, 0424376962)</span>
 </div>
 
 @if(showPopup){
 <app-input-popup (closed)="onPopupClosed($event)"> </app-input-popup>
 } @else {
-<app-potree-viewer [scene]="scene" (openPopup)="openPopup($event)"></app-potree-viewer>
+<app-potree-viewer
+  [scene]="scene"
+  (openPopup)="openPopup($event)"
+  [annotations]="annotations"
+></app-potree-viewer>
 }

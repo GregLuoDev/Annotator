@@ -7,6 +7,8 @@ import {
   Output,
   EventEmitter,
   Input,
+  signal,
+  effect,
 } from '@angular/core';
 import {
   Scene,
@@ -24,6 +26,7 @@ import {
 } from 'three';
 import { PointCloudOctree, Potree } from '@pnext/three-loader';
 import { CameraControls } from './camera-controls';
+import { IAnnotation } from '../services/types';
 
 @Component({
   selector: 'app-potree-viewer',
@@ -34,6 +37,21 @@ export class PotreeViewer implements AfterViewInit, OnInit {
   @ViewChild('viewerContainer', { static: true }) container!: ElementRef;
   @Output() openPopup = new EventEmitter<Vector3>();
   @Input() scene?: Scene;
+
+  private _annotations = signal<IAnnotation[]>([]);
+  @Input()
+  set annotations(value: IAnnotation[]) {
+    this._annotations.set(value);
+  }
+  get annotations() {
+    return this._annotations();
+  }
+
+  constructor() {
+    effect(() => {
+      console.log('Data changed via signal:', this._annotations());
+    });
+  }
 
   ngOnInit(): void {
     // @ts-ignore

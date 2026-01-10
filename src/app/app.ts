@@ -1,25 +1,18 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { AfterViewInit, ChangeDetectorRef, Component, inject, signal } from '@angular/core';
 import { PotreeViewer } from './potree-viewer/potree-viewer';
 import { InputPopup } from './input-popup/input-popup';
 import {
   CanvasTexture,
-  Intersection,
   Mesh,
   MeshBasicMaterial,
-  Object3D,
-  Object3DEventMap,
   Scene,
   SphereGeometry,
   Sprite,
   SpriteMaterial,
   Vector3,
-  Vector3Like,
 } from 'three';
-
-// Declare Potree as a global variable
-declare var Potree: any;
-declare var THREE: any;
+import { AnnotationsService } from './services/annotations';
+import { IAnnotation } from './services/types';
 
 @Component({
   selector: 'app-root',
@@ -27,13 +20,22 @@ declare var THREE: any;
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
-export class App {
+export class App implements AfterViewInit {
   protected readonly title = signal('Annotator1');
   showPopup = false;
   scene = new Scene();
   hitPoint?: Vector3;
 
-  constructor() {}
+  readonly annotationService = inject(AnnotationsService);
+  annotations: IAnnotation[] = [];
+  cdr = inject(ChangeDetectorRef);
+
+  ngAfterViewInit(): void {
+    this.annotationService.getAnnotations().subscribe((data: any) => {
+      this.annotations = JSON.parse(data.body);
+      this.cdr.detectChanges();
+    });
+  }
 
   openPopup(hitPoint: Vector3) {
     this.showPopup = true;
@@ -57,6 +59,12 @@ export class App {
       sphere.add(label);
 
       this.scene.add(sphere);
+
+      const text = value;
+      const x = this.hitPoint.x;
+      const y = this.hitPoint.y;
+      const z = this.hitPoint.z;
+      this.annotationService.addAnnotation({ text, x, y, z }).subscribe();
     }
   }
 
