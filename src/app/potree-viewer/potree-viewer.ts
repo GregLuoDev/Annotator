@@ -1,5 +1,14 @@
 import { AfterViewInit, Component, ElementRef, ViewChild, OnInit } from '@angular/core';
-import { Scene, WebGLRenderer, PerspectiveCamera } from 'three';
+import {
+  Scene,
+  WebGLRenderer,
+  PerspectiveCamera,
+  Raycaster,
+  Vector2,
+  SphereGeometry,
+  MeshBasicMaterial,
+  Mesh,
+} from 'three';
 import { PointCloudOctree, Potree } from '@pnext/three-loader';
 import { CameraControls } from './camera-controls';
 
@@ -12,6 +21,9 @@ export class PotreeViewer implements AfterViewInit, OnInit {
   @ViewChild('viewerContainer', { static: true }) container!: ElementRef;
 
   ngOnInit(): void {
+    // @ts-ignore
+    this.raycaster.params.Points.threshold = 1e-2;
+
     const container = this.container.nativeElement;
     this.initialize(container);
   }
@@ -31,9 +43,6 @@ export class PotreeViewer implements AfterViewInit, OnInit {
       .catch((err) => console.error(err));
   }
 
-  /**
-   * The element where we will insert our canvas.
-   */
   private targetEl: HTMLElement | undefined;
   /**
    * The ThreeJS renderer used to render the scene.
@@ -68,12 +77,6 @@ export class PotreeViewer implements AfterViewInit, OnInit {
    */
   private reqAnimationFrameHandle: number | undefined;
 
-  /**
-   * Initializes the viewer into the specified element.
-   *
-   * @param targetEl
-   *    The element into which we should add the canvas where we will render the scene.
-   */
   initialize(targetEl: HTMLElement): void {
     if (this.targetEl || !targetEl) {
       return;
@@ -84,13 +87,11 @@ export class PotreeViewer implements AfterViewInit, OnInit {
 
     this.resize();
     window.addEventListener('resize', this.resize);
+    window.addEventListener('click', this.onClick);
 
     requestAnimationFrame(this.loop);
   }
 
-  /**
-   * Performs any cleanup necessary to destroy/remove the viewer from the page.
-   */
   destroy(): void {
     if (!this.targetEl) {
       return;
@@ -107,14 +108,6 @@ export class PotreeViewer implements AfterViewInit, OnInit {
     }
   }
 
-  /**
-   * Loads a point cloud into the viewer and returns it.
-   *
-   * @param fileName
-   *    The name of the point cloud which is to be loaded.
-   * @param baseUrl
-   *    The url where the point cloud is located and from where we should load the octree nodes.
-   */
   load(fileName: string, baseUrl: string): Promise<PointCloudOctree> {
     return this.potree
       .loadPointCloud(
@@ -188,5 +181,46 @@ export class PotreeViewer implements AfterViewInit, OnInit {
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
+  };
+
+  private raycaster = new Raycaster();
+
+  onClick = (event: any) => {
+    if (!this.targetEl) {
+      return;
+    }
+    const mouseNdc = new Vector2();
+    const rect = this.targetEl.getBoundingClientRect();
+    mouseNdc.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouseNdc.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    this.raycaster.setFromCamera(mouseNdc, this.camera);
+
+    const intersects = this.raycaster.intersectObject(this.scene, true);
+
+    if (intersects.length > 0) {
+      const geometry = new SphereGeometry(0.2, 32, 32);
+      const material = new MeshBasicMaterial({ color: Math.random() * 0xaa4444 });
+      const sphere = new Mesh(geometry, material);
+
+      const hit = intersects[0];
+      sphere.position.copy(hit.point);
+      this.scene.add(sphere);
+
+      const position = [hit.point.x, hit.point.y, hit.point.z];
+      const cameraPosition = [
+        this.camera.position.x,
+        this.camera.position.y,
+        this.camera.position.z,
+      ];
+      const cameraTarget = [
+        this.cameraControls.target.x,
+        this.cameraControls.target.y,
+        this.cameraControls.target.z,
+      ];
+      console.log('position : ', position);
+      console.log('cameraPosition : ', cameraPosition);
+      console.log('cameraTarget : ', cameraTarget);
+    }
   };
 }
