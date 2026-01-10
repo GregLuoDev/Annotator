@@ -98,8 +98,8 @@ export class PotreeViewer implements AfterViewInit, OnInit {
     targetEl.appendChild(this.renderer.domElement);
 
     this.resize();
-    window.addEventListener('resize', this.resize);
-    window.addEventListener('click', this.onClick);
+    targetEl.addEventListener('resize', this.resize);
+    targetEl.addEventListener('click', this.onClick);
 
     requestAnimationFrame(this.loop);
   }

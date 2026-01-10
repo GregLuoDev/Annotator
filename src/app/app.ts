@@ -61,6 +61,10 @@ export class App implements AfterViewInit {
       this.annotationService.deleteAnnotation({ id: this.deletedAnnotation.id }).subscribe(() => {
         let deletedIds: number[] = [];
         this.annotationService.scene.children.forEach((c1) => {
+          if (this.deletedAnnotation && c1.userData['id'] === this.deletedAnnotation.id) {
+            deletedIds.push(c1.id);
+          }
+
           c1.children.forEach((c2) => {
             if (this.deletedAnnotation && c2.userData['id'] === this.deletedAnnotation.id) {
               deletedIds.push(c2.id);
