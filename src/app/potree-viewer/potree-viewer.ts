@@ -17,7 +17,7 @@ export class PotreeViewer implements AfterViewInit, OnInit {
   }
 
   ngAfterViewInit() {
-    this.load('cloud.js', 'https://cdn.rawgit.com/potree/potree/develop/pointclouds/lion_takanawa/')
+    this.load('cloud.js', 'assets/pointclouds/lion_takanawa/')
       .then((pco) => {
         // Make the lion shows up at the center of the screen.
         pco.translateX(-1);

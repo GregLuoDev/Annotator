@@ -30,8 +30,7 @@
             "styles": ["src/assets/potree/potree.css", "src/styles.css"],
             "scripts": [
               "src/assets/potree/libs/jquery/jquery-3.1.1.min.js",
-              "src/assets/potree/libs/three.js/build/three.min.js",
-              "src/assets/potree/potree.js"
+              "src/assets/potree/libs/three.js/build/three.min.js"
             ]
           },
           "configurations": {

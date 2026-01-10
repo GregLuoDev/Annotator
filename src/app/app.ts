@@ -1,4 +1,4 @@
-import { Component, signal, OnInit, AfterViewInit } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { PotreeViewer } from './potree-viewer/potree-viewer';
 
@@ -8,7 +8,7 @@ declare var THREE: any;
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, PotreeViewer],
+  imports: [PotreeViewer],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
