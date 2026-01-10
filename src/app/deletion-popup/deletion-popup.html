@@ -1,21 +1,19 @@
 @if(show){
 <div class="fixed inset-0 bg-opacity-40 flex items-center justify-center z-50">
   <div class="bg-white rounded-xl shadow-lg p-6 w-80 max-w-full">
-    <input
-      [(ngModel)]="value"
-      placeholder="Enter annotation"
-      autofocus
-      maxlength="256"
+    <div
       class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-    />
+    >
+      {{ deletionText }}
+    </div>
 
     <div class="flex justify-end gap-3 mt-4">
       <button
         (click)="confirm()"
-        [disabled]="!value.trim()"
+        [disabled]="!deletionText.trim()"
         class="px-4 py-2 rounded-md text-white bg-blue-600 hover:bg-blue-700 transition disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed"
       >
-        OK
+        Delete
       </button>
       <button
         (click)="cancel()"

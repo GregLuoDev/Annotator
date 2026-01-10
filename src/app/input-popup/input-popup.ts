@@ -1,13 +1,13 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-input-popup',
   imports: [FormsModule],
   templateUrl: './input-popup.html',
-  styleUrl: './input-popup.css',
 })
 export class InputPopup {
+  @Input() show = false;
   @Output() closed = new EventEmitter<string | null>();
 
   value = '';

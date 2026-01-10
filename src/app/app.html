@@ -3,8 +3,17 @@
   <span class="text-gray-500 font-normal"> (greg.luo@outlook.com, 0424376962)</span>
 </div>
 
-@if(showPopup){
-<app-input-popup (closed)="onPopupClosed($event)"> </app-input-popup>
-} @else {
-<app-potree-viewer (openPopup)="openPopup($event)" [annotations]="annotations"></app-potree-viewer>
-}
+<app-input-popup [show]="showInputPopup" (closed)="onPopupClosed($event)"> </app-input-popup>
+
+<app-deletion-popup
+  [show]="showDeletionPopup"
+  (closed)="onDeletionPopupClosed($event)"
+  [deletionText]="deletionText"
+>
+</app-deletion-popup>
+
+<app-potree-viewer
+  (openInputPopup)="openInputPopup($event)"
+  (openDeletionPopup)="openDeletionPopup($event)"
+  [annotations]="annotations"
+></app-potree-viewer>

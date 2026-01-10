@@ -18,17 +18,20 @@ import {
 export class AnnotationsService {
   private apiUrl = 'https://bbujl0wc39.execute-api.ap-southeast-2.amazonaws.com/PROD/annotations';
   scene = new Scene();
+  clickableAnnotations: (Mesh | Sprite)[] = [];
 
   constructor(private http: HttpClient) {}
 
-  /** GET data */
   getAnnotations(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl);
   }
 
-  /** POST data */
   addAnnotation(payload: any): Observable<any> {
     return this.http.post<any>(this.apiUrl, { httpMethod: 'POST', body: payload });
+  }
+
+  deleteAnnotation(payload: any): Observable<any> {
+    return this.http.delete<any>(this.apiUrl, { body: payload });
   }
 
   addAnnotationOnScene(text: string, hitPoint: Vector3) {
@@ -40,7 +43,14 @@ export class AnnotationsService {
 
     const label = this.createTextLabel(text);
     label.position.set(0, 0.35, 0);
+    sphere.userData = { text }; // store text for popup
+    label.userData = { text }; // store text for popup
     sphere.add(label);
+
+    // Track sphere as clickable
+    this.clickableAnnotations.push(sphere);
+    // Track label as clickable too
+    this.clickableAnnotations.push(label);
 
     this.scene.add(sphere);
   }

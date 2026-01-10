@@ -37,7 +37,8 @@ import { AnnotationsService } from '../services/annotations';
 })
 export class PotreeViewer implements AfterViewInit, OnInit {
   @ViewChild('viewerContainer', { static: true }) container!: ElementRef;
-  @Output() openPopup = new EventEmitter<Vector3>();
+  @Output() openInputPopup = new EventEmitter<Vector3>();
+  @Output() openDeletionPopup = new EventEmitter<string>();
 
   readonly annotationService = inject(AnnotationsService);
   scene?: Scene = this.annotationService.scene;
@@ -176,7 +177,7 @@ export class PotreeViewer implements AfterViewInit, OnInit {
 
   private raycaster = new Raycaster();
 
-  onClick = (event: any) => {
+  onClick = (event: MouseEvent) => {
     if (!this.targetEl || !this.scene) {
       return;
     }
@@ -186,11 +187,24 @@ export class PotreeViewer implements AfterViewInit, OnInit {
     normalized.set((event.clientX / rect.width) * 2 - 1, -(event.clientY / rect.height) * 2 + 1);
     this.raycaster.setFromCamera(normalized, this.camera);
 
-    const intersects = this.raycaster.intersectObject(this.scene, true);
+    const intersectAnnotations = this.raycaster.intersectObjects(
+      this.annotationService.clickableAnnotations,
+      true
+    );
+    if (intersectAnnotations.length > 0) {
+      const obj = intersectAnnotations[0].object;
+      console.log('Clicked object:', obj);
 
-    if (intersects.length > 0) {
-      const hit = intersects[0];
-      this.openPopup.emit(hit.point);
+      // Open popup (can be a DOM modal or alert for demo)
+      alert(`You clicked annotation: ${(obj.userData as any).text}`);
+      this.openDeletionPopup.emit((obj.userData as any).text);
+    } else {
+      const intersects = this.raycaster.intersectObject(this.scene, true);
+
+      if (intersects.length > 0) {
+        const hit = intersects[0];
+        this.openInputPopup.emit(hit.point);
+      }
     }
   };
 }
