@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { PotreeViewer } from './potree-viewer/potree-viewer';
 import { InputPopup } from './input-popup/input-popup';
 import {
+  CanvasTexture,
   Intersection,
   Mesh,
   MeshBasicMaterial,
@@ -10,6 +11,8 @@ import {
   Object3DEventMap,
   Scene,
   SphereGeometry,
+  Sprite,
+  SpriteMaterial,
   Vector3,
   Vector3Like,
 } from 'three';
@@ -48,9 +51,36 @@ export class App {
       const sphere = new Mesh(geometry, material);
 
       sphere.position.copy(this.hitPoint);
+
+      const label = this.createTextLabel(value);
+      label.position.set(0, 0.35, 0);
+      sphere.add(label);
+
       this.scene.add(sphere);
-    } else {
-      console.log('Popup cancelled');
     }
+  }
+
+  createTextLabel(text: string) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d')!;
+
+    canvas.width = 256;
+    canvas.height = 128;
+
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = '#fff';
+    ctx.font = '32px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+
+    const texture = new CanvasTexture(canvas);
+    const material = new SpriteMaterial({ map: texture });
+    const sprite = new Sprite(material);
+
+    sprite.scale.set(1, 0.5, 1);
+    return sprite;
   }
 }

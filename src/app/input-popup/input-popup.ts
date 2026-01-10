@@ -8,23 +8,17 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './input-popup.css',
 })
 export class InputPopup {
-  @Input() show = false;
   @Output() closed = new EventEmitter<string | null>();
 
   value = '';
 
   confirm() {
-    this.closed.emit(this.value); // return value
-    this.reset();
+    this.closed.emit(this.value);
+    this.value = '';
   }
 
   cancel() {
-    this.closed.emit(null); // cancel
-    this.reset();
-  }
-
-  private reset() {
+    this.closed.emit(null);
     this.value = '';
-    this.show = false;
   }
 }

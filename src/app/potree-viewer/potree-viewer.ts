@@ -206,27 +206,23 @@ export class PotreeViewer implements AfterViewInit, OnInit {
     if (!this.targetEl || !this.scene) {
       return;
     }
-    const mouseNdc = new Vector2();
-    const rect = this.targetEl.getBoundingClientRect();
-    mouseNdc.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    mouseNdc.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
-    this.raycaster.setFromCamera(mouseNdc, this.camera);
+    const normalized = new Vector2();
+    const rect = this.targetEl.getBoundingClientRect();
+    normalized.set((event.clientX / rect.width) * 2 - 1, -(event.clientY / rect.height) * 2 + 1);
+    this.raycaster.setFromCamera(normalized, this.camera);
 
     const intersects = this.raycaster.intersectObject(this.scene, true);
 
     if (intersects.length > 0) {
-      const geometry = new SphereGeometry(0.2, 32, 32);
-      const material = new MeshBasicMaterial({ color: Math.random() * 0xaa4444 });
-      const sphere = new Mesh(geometry, material);
-
-      const hit: Intersection<Object3D<Object3DEventMap>> = intersects[0];
+      const hit = intersects[0];
       this.openPopup.emit(hit.point);
+    }
+  };
+}
 
-      sphere.position.copy(hit.point);
-      this.scene.add(sphere);
-
-      const position = [hit.point.x, hit.point.y, hit.point.z];
+/*
+   const position = [hit.point.x, hit.point.y, hit.point.z];
       const cameraPosition = [
         this.camera.position.x,
         this.camera.position.y,
@@ -240,19 +236,4 @@ export class PotreeViewer implements AfterViewInit, OnInit {
       console.log('position : ', position);
       console.log('cameraPosition : ', cameraPosition);
       console.log('cameraTarget : ', cameraTarget);
-
-      /*
-      let aAbout1 = new Annotation({
-        position: [590043.63, 231490.79, 740.78],
-        title: elTitle,
-        cameraPosition: [590105.53, 231541.63, 782.05],
-        cameraTarget: [590043.63, 231488.79, 740.78],
-        description: `<ul><li>Click on the annotation label to move a predefined view.</li> 
-						<li>Click on the icon to execute the specified action.</li>
-						In this case, the action will bring you to another scene and point cloud.</ul>`,
-      });
-
-      this.scene.annotations.add(aAbout1);*/
-    }
-  };
-}
+*/
