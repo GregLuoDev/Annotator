@@ -21,9 +21,8 @@ import { IAnnotation } from './services/types';
   styleUrl: './app.css',
 })
 export class App implements AfterViewInit {
-  protected readonly title = signal('Annotator1');
   showPopup = false;
-  scene = new Scene();
+
   hitPoint?: Vector3;
 
   readonly annotationService = inject(AnnotationsService);
@@ -48,47 +47,15 @@ export class App implements AfterViewInit {
     if (value && this.hitPoint) {
       console.log('User input:', value);
 
-      const geometry = new SphereGeometry(0.2, 32, 32);
-      const material = new MeshBasicMaterial({ color: Math.random() * 0xaa4444 });
-      const sphere = new Mesh(geometry, material);
-
-      sphere.position.copy(this.hitPoint);
-
-      const label = this.createTextLabel(value);
-      label.position.set(0, 0.35, 0);
-      sphere.add(label);
-
-      this.scene.add(sphere);
-
       const text = value;
       const x = this.hitPoint.x;
       const y = this.hitPoint.y;
       const z = this.hitPoint.z;
-      this.annotationService.addAnnotation({ text, x, y, z }).subscribe();
+      this.annotationService.addAnnotation({ text, x, y, z }).subscribe(() => {
+        if (this.hitPoint) {
+          this.annotationService.addAnnotationOnScene(value, this.hitPoint);
+        }
+      });
     }
-  }
-
-  createTextLabel(text: string) {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d')!;
-
-    canvas.width = 256;
-    canvas.height = 128;
-
-    ctx.fillStyle = 'rgba(0,0,0,0.6)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = '#fff';
-    ctx.font = '32px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(text, canvas.width / 2, canvas.height / 2);
-
-    const texture = new CanvasTexture(canvas);
-    const material = new SpriteMaterial({ map: texture });
-    const sprite = new Sprite(material);
-
-    sprite.scale.set(1, 0.5, 1);
-    return sprite;
   }
 }

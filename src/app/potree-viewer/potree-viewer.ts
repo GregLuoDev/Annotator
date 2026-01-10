@@ -9,6 +9,7 @@ import {
   Input,
   signal,
   effect,
+  inject,
 } from '@angular/core';
 import {
   Scene,
@@ -27,6 +28,7 @@ import {
 import { PointCloudOctree, Potree } from '@pnext/three-loader';
 import { CameraControls } from './camera-controls';
 import { IAnnotation } from '../services/types';
+import { AnnotationsService } from '../services/annotations';
 
 @Component({
   selector: 'app-potree-viewer',
@@ -36,7 +38,9 @@ import { IAnnotation } from '../services/types';
 export class PotreeViewer implements AfterViewInit, OnInit {
   @ViewChild('viewerContainer', { static: true }) container!: ElementRef;
   @Output() openPopup = new EventEmitter<Vector3>();
-  @Input() scene?: Scene;
+
+  readonly annotationService = inject(AnnotationsService);
+  scene?: Scene = this.annotationService.scene;
 
   private _annotations = signal<IAnnotation[]>([]);
   @Input()
@@ -49,12 +53,15 @@ export class PotreeViewer implements AfterViewInit, OnInit {
 
   constructor() {
     effect(() => {
-      console.log('Data changed via signal:', this._annotations());
+      this._annotations().forEach((annotation) => {
+        const text = annotation.text;
+        const hitPoint = { x: annotation.x, y: annotation.y, z: annotation.z } as Vector3;
+        this.annotationService.addAnnotationOnScene(text, hitPoint);
+      });
     });
   }
 
   ngOnInit(): void {
-    // @ts-ignore
     this.raycaster.params.Points.threshold = 1e-2;
 
     const container = this.container.nativeElement;
@@ -64,50 +71,20 @@ export class PotreeViewer implements AfterViewInit, OnInit {
   ngAfterViewInit() {
     this.load('cloud.js', 'assets/pointclouds/lion_takanawa/')
       .then((pco) => {
-        // Make the lion shows up at the center of the screen.
         pco.translateX(-1);
         pco.rotateX(-Math.PI / 2);
-
-        // The point cloud octree already comes with a material which
-        // can be customized directly. Here we just set the size of the
-        // points.
         pco.material.size = 1.0;
       })
       .catch((err) => console.error(err));
   }
 
   private targetEl: HTMLElement | undefined;
-  /**
-   * The ThreeJS renderer used to render the scene.
-   */
   private renderer = new WebGLRenderer();
-  /**
-   * Our scene which will contain the point cloud.
-   */
-
-  /**
-   * The camera used to view the scene.
-   */
   private camera = new PerspectiveCamera(45, NaN, 0.1, 1000);
-  /**
-   * Controls which update the position of the camera.
-   */
   private cameraControls = new CameraControls(this.camera);
-  /**
-   * Out potree instance which handles updating point clouds, keeps track of loaded nodes, etc.
-   */
   private potree = new Potree();
-  /**
-   * Array of point clouds which are in the scene and need to be updated.
-   */
   private pointClouds: PointCloudOctree[] = [];
-  /**
-   * The time (milliseconds) when `loop()` was last called.
-   */
   private prevTime: number | undefined;
-  /**
-   * requestAnimationFrame handle we can use to cancel the viewer loop.
-   */
   private reqAnimationFrameHandle: number | undefined;
 
   initialize(targetEl: HTMLElement): void {
@@ -160,27 +137,12 @@ export class PotreeViewer implements AfterViewInit, OnInit {
       });
   }
 
-  /**
-   * Updates the point clouds, cameras or any other objects which are in the scene.
-   *
-   * @param dt
-   *    The time, in milliseconds, since the last update.
-   */
   update(dt: number): void {
-    // Alternatively, you could use Three's OrbitControls or any other
-    // camera control system.
     this.cameraControls.update(dt);
 
-    // This is where most of the potree magic happens. It updates the
-    // visiblily of the octree nodes based on the camera frustum and it
-    // triggers any loads/unloads which are necessary to keep the number
-    // of visible points in check.
     this.potree.updatePointClouds(this.pointClouds, this.camera, this.renderer);
   }
 
-  /**
-   * Renders the scene into the canvas.
-   */
   render(): void {
     this.renderer.clear();
     if (this.scene) {
@@ -188,9 +150,6 @@ export class PotreeViewer implements AfterViewInit, OnInit {
     }
   }
 
-  /**
-   * The main loop of the viewer, called at 60FPS, if possible.
-   */
   loop = (time: number): void => {
     this.reqAnimationFrameHandle = requestAnimationFrame(this.loop);
 
@@ -204,9 +163,6 @@ export class PotreeViewer implements AfterViewInit, OnInit {
     this.render();
   };
 
-  /**
-   * Triggered anytime the window gets resized.
-   */
   resize = () => {
     if (!this.targetEl) {
       return;
@@ -238,20 +194,3 @@ export class PotreeViewer implements AfterViewInit, OnInit {
     }
   };
 }
-
-/*
-   const position = [hit.point.x, hit.point.y, hit.point.z];
-      const cameraPosition = [
-        this.camera.position.x,
-        this.camera.position.y,
-        this.camera.position.z,
-      ];
-      const cameraTarget = [
-        this.cameraControls.target.x,
-        this.cameraControls.target.y,
-        this.cameraControls.target.z,
-      ];
-      console.log('position : ', position);
-      console.log('cameraPosition : ', cameraPosition);
-      console.log('cameraTarget : ', cameraTarget);
-*/

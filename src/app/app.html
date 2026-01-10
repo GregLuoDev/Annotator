@@ -6,9 +6,5 @@
 @if(showPopup){
 <app-input-popup (closed)="onPopupClosed($event)"> </app-input-popup>
 } @else {
-<app-potree-viewer
-  [scene]="scene"
-  (openPopup)="openPopup($event)"
-  [annotations]="annotations"
-></app-potree-viewer>
+<app-potree-viewer (openPopup)="openPopup($event)" [annotations]="annotations"></app-potree-viewer>
 }
