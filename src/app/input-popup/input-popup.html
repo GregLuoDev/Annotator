@@ -1,0 +1,12 @@
+@if (show) {
+<div class="overlay">
+  <div class="popup">
+    <input [(ngModel)]="value" placeholder="Enter text" autofocus />
+
+    <div class="actions">
+      <button (click)="confirm()">OK</button>
+      <button (click)="cancel()">Cancel</button>
+    </div>
+  </div>
+</div>
+}

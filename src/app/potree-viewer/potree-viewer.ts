@@ -1,4 +1,13 @@
-import { AfterViewInit, Component, ElementRef, ViewChild, OnInit } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  ViewChild,
+  OnInit,
+  Output,
+  EventEmitter,
+  Input,
+} from '@angular/core';
 import {
   Scene,
   WebGLRenderer,
@@ -8,6 +17,10 @@ import {
   SphereGeometry,
   MeshBasicMaterial,
   Mesh,
+  Vector3,
+  Intersection,
+  Object3D,
+  Object3DEventMap,
 } from 'three';
 import { PointCloudOctree, Potree } from '@pnext/three-loader';
 import { CameraControls } from './camera-controls';
@@ -19,6 +32,8 @@ import { CameraControls } from './camera-controls';
 })
 export class PotreeViewer implements AfterViewInit, OnInit {
   @ViewChild('viewerContainer', { static: true }) container!: ElementRef;
+  @Output() openPopup = new EventEmitter<Vector3>();
+  @Input() scene?: Scene;
 
   ngOnInit(): void {
     // @ts-ignore
@@ -51,7 +66,7 @@ export class PotreeViewer implements AfterViewInit, OnInit {
   /**
    * Our scene which will contain the point cloud.
    */
-  private scene = new Scene();
+
   /**
    * The camera used to view the scene.
    */
@@ -120,7 +135,7 @@ export class PotreeViewer implements AfterViewInit, OnInit {
         // Add the point cloud to the scene and to our list of
         // point clouds. We will pass this list of point clouds to
         // potree to tell it to update them.
-        this.scene.add(pco);
+        this.scene?.add(pco);
         this.pointClouds.push(pco);
 
         return pco;
@@ -150,7 +165,9 @@ export class PotreeViewer implements AfterViewInit, OnInit {
    */
   render(): void {
     this.renderer.clear();
-    this.renderer.render(this.scene, this.camera);
+    if (this.scene) {
+      this.renderer.render(this.scene, this.camera);
+    }
   }
 
   /**
@@ -186,7 +203,7 @@ export class PotreeViewer implements AfterViewInit, OnInit {
   private raycaster = new Raycaster();
 
   onClick = (event: any) => {
-    if (!this.targetEl) {
+    if (!this.targetEl || !this.scene) {
       return;
     }
     const mouseNdc = new Vector2();
@@ -203,7 +220,9 @@ export class PotreeViewer implements AfterViewInit, OnInit {
       const material = new MeshBasicMaterial({ color: Math.random() * 0xaa4444 });
       const sphere = new Mesh(geometry, material);
 
-      const hit = intersects[0];
+      const hit: Intersection<Object3D<Object3DEventMap>> = intersects[0];
+      this.openPopup.emit(hit.point);
+
       sphere.position.copy(hit.point);
       this.scene.add(sphere);
 
@@ -221,6 +240,19 @@ export class PotreeViewer implements AfterViewInit, OnInit {
       console.log('position : ', position);
       console.log('cameraPosition : ', cameraPosition);
       console.log('cameraTarget : ', cameraTarget);
+
+      /*
+      let aAbout1 = new Annotation({
+        position: [590043.63, 231490.79, 740.78],
+        title: elTitle,
+        cameraPosition: [590105.53, 231541.63, 782.05],
+        cameraTarget: [590043.63, 231488.79, 740.78],
+        description: `<ul><li>Click on the annotation label to move a predefined view.</li> 
+						<li>Click on the icon to execute the specified action.</li>
+						In this case, the action will bring you to another scene and point cloud.</ul>`,
+      });
+
+      this.scene.annotations.add(aAbout1);*/
     }
   };
 }

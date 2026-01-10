@@ -1,3 +1,4 @@
 GREG LUO
+<app-input-popup [show]="showPopup" (closed)="onPopupClosed($event)"> </app-input-popup>
 
-<app-potree-viewer></app-potree-viewer>
+<app-potree-viewer [scene]="scene" (openPopup)="openPopup($event)"></app-potree-viewer>
