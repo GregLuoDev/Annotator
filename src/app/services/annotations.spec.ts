@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { Annotations } from './annotations';
+import { AnnotationsService } from './annotations';
 
 describe('Annotations', () => {
-  let service: Annotations;
+  let service: AnnotationsService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(Annotations);
+    service = TestBed.inject(AnnotationsService);
   });
 
   it('should be created', () => {

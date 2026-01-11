@@ -12,7 +12,7 @@ import { DeletionPopup } from './deletion-popup/deletion-popup';
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
-export class App implements AfterViewInit {
+export class AppRoot implements AfterViewInit {
   showInputPopup = false;
   showDeletionPopup = false;
 

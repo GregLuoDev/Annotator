@@ -33,7 +33,6 @@ import { AnnotationsService } from '../services/annotations';
 @Component({
   selector: 'app-potree-viewer',
   templateUrl: './potree-viewer.html',
-  styleUrls: ['./potree-viewer.css'],
 })
 export class PotreeViewer implements AfterViewInit, OnInit {
   @ViewChild('viewerContainer', { static: true }) container!: ElementRef;
@@ -122,16 +121,8 @@ export class PotreeViewer implements AfterViewInit, OnInit {
 
   load(fileName: string, baseUrl: string): Promise<PointCloudOctree> {
     return this.potree
-      .loadPointCloud(
-        // The file name of the point cloud which is to be loaded.
-        fileName,
-        // Given the relative URL of a file, should return a full URL.
-        (url) => `${baseUrl}${url}`
-      )
+      .loadPointCloud(fileName, (url) => `${baseUrl}${url}`)
       .then((pco: PointCloudOctree) => {
-        // Add the point cloud to the scene and to our list of
-        // point clouds. We will pass this list of point clouds to
-        // potree to tell it to update them.
         this.scene?.add(pco);
         this.pointClouds.push(pco);
 
