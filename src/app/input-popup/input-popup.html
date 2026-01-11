@@ -1,8 +1,9 @@
-@if(show){
+@if(show()){
 <div class="fixed inset-0 bg-opacity-40 flex items-center justify-center z-50">
   <div class="bg-white rounded-xl shadow-lg p-6 w-80 max-w-full">
     <input
-      [(ngModel)]="value"
+      [value]="text()"
+      (input)="text.set($any($event.target).value)"
       placeholder="Enter annotation"
       autofocus
       maxlength="256"
@@ -12,7 +13,7 @@
     <div class="flex justify-end gap-3 mt-4">
       <button
         (click)="confirm()"
-        [disabled]="!value.trim()"
+        [disabled]="!text().trim()"
         class="px-4 py-2 rounded-md text-white bg-blue-600 hover:bg-blue-700 transition disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed"
       >
         Save

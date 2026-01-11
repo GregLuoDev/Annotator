@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, input } from '@angular/core';
+import { Component, Input, Output, EventEmitter, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -7,9 +7,9 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './deletion-popup.html',
 })
 export class DeletionPopup {
-  @Input() deletionText = '';
-  @Input() show = false;
-  @Output() closed = new EventEmitter<boolean>();
+  deletionText = input<string>('');
+  show = input<boolean>(false);
+  closed = output<boolean>();
 
   confirm() {
     this.closed.emit(true);

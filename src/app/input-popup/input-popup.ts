@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, input } from '@angular/core';
+import { Component, Input, Output, EventEmitter, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -7,18 +7,17 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './input-popup.html',
 })
 export class InputPopup {
-  @Input() show = false;
-  @Output() closed = new EventEmitter<string | null>();
-
-  value = '';
+  show = input<boolean>(false);
+  closed = output<string | null>();
+  text = signal('');
 
   confirm() {
-    this.closed.emit(this.value);
-    this.value = '';
+    this.closed.emit(this.text());
+    this.text.set('');
   }
 
   cancel() {
     this.closed.emit(null);
-    this.value = '';
+    this.text.set('');
   }
 }

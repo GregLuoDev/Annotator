@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
   CanvasTexture,
@@ -17,11 +17,11 @@ import { IAnnotation, IDeletedAnnotation } from './types';
   providedIn: 'root',
 })
 export class AnnotationsService {
+  http = inject(HttpClient);
+
   private apiUrl = 'https://bbujl0wc39.execute-api.ap-southeast-2.amazonaws.com/PROD/annotations';
   scene = new Scene();
   clickableAnnotations: (Mesh | Sprite)[] = [];
-
-  constructor(private http: HttpClient) {}
 
   getAnnotations(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl);

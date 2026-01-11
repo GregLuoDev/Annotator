@@ -4,27 +4,13 @@ import {
   ElementRef,
   ViewChild,
   OnInit,
-  Output,
-  EventEmitter,
-  Input,
-  signal,
   effect,
   inject,
+  output,
+  input,
+  viewChild,
 } from '@angular/core';
-import {
-  Scene,
-  WebGLRenderer,
-  PerspectiveCamera,
-  Raycaster,
-  Vector2,
-  SphereGeometry,
-  MeshBasicMaterial,
-  Mesh,
-  Vector3,
-  Intersection,
-  Object3D,
-  Object3DEventMap,
-} from 'three';
+import { Scene, WebGLRenderer, PerspectiveCamera, Raycaster, Vector2, Vector3 } from 'three';
 import { PointCloudOctree, Potree } from '@pnext/three-loader';
 import { CameraControls } from './camera-controls';
 import { IAnnotation } from '../services/types';
@@ -35,25 +21,17 @@ import { AnnotationsService } from '../services/annotations';
   templateUrl: './potree-viewer.html',
 })
 export class PotreeViewer implements AfterViewInit, OnInit {
-  @ViewChild('viewerContainer', { static: true }) container!: ElementRef;
-  @Output() openInputPopup = new EventEmitter<Vector3>();
-  @Output() openDeletionPopup = new EventEmitter<string>();
+  container = viewChild.required<ElementRef>('viewerContainer');
+  openInputPopup = output<Vector3>();
+  openDeletionPopup = output<string>();
+  annotations = input<IAnnotation[]>([]);
 
   readonly annotationService = inject(AnnotationsService);
   scene?: Scene = this.annotationService.scene;
 
-  private _annotations = signal<IAnnotation[]>([]);
-  @Input()
-  set annotations(value: IAnnotation[]) {
-    this._annotations.set(value);
-  }
-  get annotations() {
-    return this._annotations();
-  }
-
   constructor() {
     effect(() => {
-      this._annotations().forEach((annotation) => {
+      this.annotations().forEach((annotation) => {
         const id = annotation.id;
         const text = annotation.text;
         const hitPoint = { x: annotation.x, y: annotation.y, z: annotation.z } as Vector3;
@@ -65,8 +43,8 @@ export class PotreeViewer implements AfterViewInit, OnInit {
   ngOnInit(): void {
     this.raycaster.params.Points.threshold = 1e-2;
 
-    const container = this.container.nativeElement;
-    this.initialize(container);
+    const containerElement = this.container().nativeElement;
+    this.initialize(containerElement);
   }
 
   ngAfterViewInit() {
