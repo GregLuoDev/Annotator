@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "Annotator1": {
+    "Annotator": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -61,10 +61,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "Annotator1:build:production"
+              "buildTarget": "Annotator:build:production"
             },
             "development": {
-              "buildTarget": "Annotator1:build:development"
+              "buildTarget": "Annotator:build:development"
             }
           },
           "defaultConfiguration": "development"
